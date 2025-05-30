@@ -1,4 +1,5 @@
-package main 
+package main
+
 import (
 	"time"
 	"github.com/wexlerdev/pokedexcli/internal/pokeapi"
@@ -9,10 +10,10 @@ import (
 
 func main() {
 	pokeClient := pokeapi.NewClient(5 * time.Second)
-	config := &config{
+	config := config{
 		pokeapiClient: pokeClient,
 	}
-	startRepl()
+	startRepl(&config)
 }
 
 
