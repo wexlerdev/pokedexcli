@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"math/rand/v2"
+	"github.com/wexlerdev/pokedexcli/internal/pokeapi"
+	"strings"
 )
 
 func commandExit(_ * config, _ ...string) error {
@@ -88,11 +90,15 @@ func commandCatch(config * config, params ...string) error {
 	didCatch := rand.Float64() - chanceToCatch <= 0.0
 	fmt.Printf("Throwing a Pokeball at %v...", pokemonName)
 	fmt.Printf("Chance to catch %v: %v%%\n", pokemonName, chanceToCatch * 100.0)
-	if didCatch {
-		fmt.Println("CAUGHT!!")
-	} else {
-		fmt.Println("DID NOT CATCH")
-	}
+	if !didCatch {
+		fmt.Println("Did not Catch :(😫")
+		return nil
+	} 
+
+	//did catch :-)
+	config.pokedex[pokemonName] = *pokemonData
+	fmt.Println("Caught and added to pokedex 😁")
+
 
 	return nil
 
@@ -116,4 +122,55 @@ func calculateCatchChance(xp int) float64 {
 		return 0.1
 	}
 	return chanceToCatch / 100.0
+}
+
+func commandInspect(config * config, params ...string) error {
+	if len(params) == 0 {
+		return fmt.Errorf("need to pass in pokemon name")
+	}
+
+	pokemonName := params[0]
+
+	pokemon, found := config.pokedex[pokemonName]
+	if !found {
+		fmt.Println("you have not caught this pokemon silly")
+		return nil
+	}
+	printPokemonDetails(pokemon)
+
+	return nil
+}
+
+func printPokemonDetails(p pokeapi.PokemonData) {
+	fmt.Println("--- Pokémon Stats ---")
+	fmt.Printf("Name: %s\n", p.Name)
+	fmt.Printf("ID: %d\n", p.ID)
+	fmt.Printf("Height: %d dm (%s feet, %.1f inches)\n", p.Height, formatHeight(p.Height), float64(p.Height)*3.937)
+	fmt.Printf("Weight: %d hg (%s lbs)\n", p.Weight, formatWeight(p.Weight))
+	fmt.Printf("Front Default Sprite: %s\n", p.Sprites.FrontDefault)
+
+	fmt.Println("\nBase Stats:")
+	for _, stat := range p.Stats {
+		fmt.Printf("  %s: %d\n", formatStatName(stat.Stat.Name), stat.BaseStat)
+	}
+}
+
+// formatHeight converts decimeters to feet and inches.
+func formatHeight(decimeters int) string {
+	totalInches := float64(decimeters) * 3.937
+	feet := int(totalInches / 12)
+	inches := int(totalInches) % 12
+	return fmt.Sprintf("%d'%d\"", feet, inches)
+}
+
+// formatWeight converts hectograms to pounds.
+func formatWeight(hectograms int) string {
+	pounds := float64(hectograms) * 0.220462
+	return fmt.Sprintf("%.1f lbs", pounds)
+}
+
+// formatStatName formats stat names like "special-attack" to "Special Attack".
+func formatStatName(s string) string {
+	s = strings.ReplaceAll(s, "-", " ") // Replace hyphens with spaces
+	return strings.Title(s)             // Capitalize first letter of each word
 }

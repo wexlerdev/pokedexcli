@@ -2,8 +2,20 @@ package pokeapi
 
 
 type PokemonData struct {
-	BaseExperience int `json:"base_experience"`
-	Weight int `json:"weight"`
+	ID      int    `json:"id"`
+	Name    string `json:"name"`
+	Height  int    `json:"height"`
+	Weight  int    `json:"weight"`
+	BaseExperience int    `json:"base_experience"` 
+	Sprites struct {
+		FrontDefault string `json:"front_default"`
+	} `json:"sprites"`
+	Stats []struct {
+		BaseStat int `json:"base_stat"`
+		Stat     struct {
+			Name string `json:"name"`
+		} `json:"stat"`
+	} `json:"stats"`
 }
 
 type PokemonEncounterData struct {
