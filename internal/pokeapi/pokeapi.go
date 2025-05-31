@@ -7,24 +7,6 @@ import (
 	"io"
 )
 
-type PokemonEncounterData struct {
-	PokemonEncounters []struct {
-		Pokemon struct {
-			Name string `json:"name"`
-			URL  string `json:"url"`
-		} `json:"pokemon"`
-	} `json:"pokemon_encounters"`
-}
-
-type PokeLocationData struct {
-	Count    int    `json:"count"`
-	Next     *string `json:"next"`
-	Previous *string    `json:"previous"`
-	Results  []struct {
-		Name string `json:"name"`
-		URL  string `json:"url"`
-	} `json:"results"`
-}
 
 const (
 	baseURL = "https://pokeapi.co/api/v2"
@@ -139,4 +121,37 @@ func (c * Client) GetPokemonInArea(locationName string) ([]string, error) {
 	c.cache.Add(url, data)
 
 	return pokemonNameSlice, nil
+}
+
+func (c * Client) GetPokemon(pokemonName string) (* PokemonData, error) {
+	
+	url := baseURL + "/pokemon/" + pokemonName
+	
+
+	//Cache Miss ------
+	
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var pokemonData PokemonData
+
+	err = json.Unmarshal(data, &pokemonData)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pokemonData, nil
 }
