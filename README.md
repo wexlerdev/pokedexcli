@@ -1,4 +1,5 @@
-[![Video Thumbnail](https://www.youtube.com/watch?v=xvFZjo5PgG0&ab_channel=Duran)](https://www.youtube.com/watch?v=xvFZjo5PgG0&ab_channel=Duran "Watch the Demo Video")
 
-**_Click the image above to watch the demo video!_**
+https://github.com/user-attachments/assets/5d5a1ee5-cec5-4edb-a074-e8b5a7ef43f7
+
+
 
