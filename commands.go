@@ -174,3 +174,12 @@ func formatStatName(s string) string {
 	s = strings.ReplaceAll(s, "-", " ") // Replace hyphens with spaces
 	return strings.Title(s)             // Capitalize first letter of each word
 }
+
+
+func commandPokedex(config * config, params ...string) error{
+	fmt.Println("Your pokedex")
+	for _, pokemon := range config.pokedex {
+		fmt.Printf(" <> %v\n", pokemon.Name)
+	}
+	return nil
+}
