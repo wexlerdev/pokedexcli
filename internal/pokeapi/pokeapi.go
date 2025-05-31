@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"encoding/json"
 	"fmt"
+	"io"
 )
 
 type PokeLocationData struct {
@@ -27,6 +28,21 @@ func (c *Client) GetLocationAreas(pageUrl *string)(PokeLocationData, error) {
 	if pageUrl != nil {
 		url = *pageUrl
 	}
+
+	//check cache for url
+	byteSlice, isCacheHit := c.cache.Get(url)
+
+	if isCacheHit {
+		fmt.Println("CACHE HIT")
+		var pokeLocationStruct PokeLocationData
+		err := json.Unmarshal(byteSlice, &pokeLocationStruct)
+		if err != nil {
+			return PokeLocationData{}, fmt.Errorf("error unmarshaling cache hit")
+		}
+		return pokeLocationStruct, nil
+	}
+
+	//Cache Miss ------
 	
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -38,14 +54,21 @@ func (c *Client) GetLocationAreas(pageUrl *string)(PokeLocationData, error) {
 		return PokeLocationData{}, fmt.Errorf("Location GET failed")
 	}
 	defer res.Body.Close()
-	
+
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		return PokeLocationData{}, err
+	}
+
 	var pokeLocationStruct PokeLocationData
 
-	decoder := json.NewDecoder(res.Body)
-	err = decoder.Decode(&pokeLocationStruct)
+	err = json.Unmarshal(data, &pokeLocationStruct)
 	if err != nil {
 		return PokeLocationData{}, fmt.Errorf("Failure Decoding Location Bytes")
 	}
+
+	//store data in cache
+	c.cache.Add(url, data)
 
 	return pokeLocationStruct, nil
 }
